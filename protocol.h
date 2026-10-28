@@ -51,7 +51,7 @@
 #define S_RCPT 3
 #define S_DATA 4
 #define S_WRITE 5
-#define S_QUIT 4
+#define S_QUIT 6
 
 
 //PUERTO DEL SERVICIO
