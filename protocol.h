@@ -33,9 +33,12 @@
 
 
 // RESPUESTAS A COMANDOS DE APLICACION
+// SMTP SERVER RESPONSES
+#define ST220 "220"
+#define ST221 "221" //Server closing transmission channel
+#define ST250 "250"
+
 //Respuestas adaptadas a la práctica 3 y al protocolo SMTP incluyendo códigos de estados
-#define ST220  "220"
-#define ST250  "250"
 #define OK  "OK"
 #define ER  "ER"
 #define NA	"NA" //Response created for task 5
