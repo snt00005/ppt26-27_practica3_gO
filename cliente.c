@@ -172,12 +172,11 @@ int main(int* argc, char* argv[])
 							status = S_QUIT;
 						}
 						else
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", PASS, input, CRLF);
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", MAIL, input, CRLF);
 						break;
 
 					case S_DATA:
-						printf("Estancias disponibles: \r\n- Sala de juntas(cw00).\r\n- Sala coworking grande norte(cw01).\r\n- Sala coworking grande sur(cw02). \r\n- Sala coworking junior(cw03). \r\n");
-						printf("CLIENTE> Introduzca código de estancia (enter para salir): ");
+						printf("CLIENTE> Introduzca su mensaje (enter para salir): ");
 						gets_s(input, sizeof(input));
 
 						// Validate room code
@@ -192,8 +191,17 @@ int main(int* argc, char* argv[])
 							status = S_QUIT;
 						}
 						else {
+							
 							unsigned int dayint;
 							unsigned int monthint;
+
+							char subject[64] = "";
+
+							printf("CLIENTE> Introduzca el asunto: ");
+							gets_s(input, sizeof(input));
+
+							//
+
 
 							// Validate day and month
 							do {
@@ -289,6 +297,24 @@ int main(int* argc, char* argv[])
 								}
 								break;
 							case S_MAIL:
+								break;
+							case S_RCPT:
+								/*
+								IF (OK)
+									IF (OTRO?)
+										status = S_RCPT;
+									ELSE
+										status = S_DATA;
+								ELSE 
+									status = S_RCPT;
+
+
+								
+								*/
+								break;
+							case S_DATA:
+
+								break;
 
 						}
 						if (status != S_DATA && strncmp(buffer_in, OK, 2) == 0){
