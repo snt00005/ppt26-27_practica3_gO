@@ -43,6 +43,14 @@ int main(int* argc, char* argv[])
 	int received = 0, sent = 0;
 	int status;
 	char option;
+	char subject[1024];
+	char from[1024];
+	char to[1024];
+	int headers = 0;
+	int sending = 0;
+
+	int reset_requested = 0;
+
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
 	char default_ip4[16] = "127.0.0.1";
@@ -197,54 +205,7 @@ int main(int* argc, char* argv[])
 						break;
 
 					case S_DATA:
-						printf("CLIENTE> Introduzca su mensaje (enter para salir): ");
-						gets_s(input, sizeof(input));
-
-						// Validate room code
-						while (strlen(input) != 4 && strlen(input) != 0) { // Checks if it has exactly 4 characters and is not empty
-							printf("CLIENTE> ERROR: El código de estancia debe tener exactamente 4 caracteres.\r\n");
-							printf("CLIENTE> Introduzca código de estancia (enter para salir): ");
-							gets_s(input, sizeof(input));
-						}
-
-						if (strlen(input) == 0) { //Press enter to exit
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", QUIT, CRLF);
-							status = S_QUIT;
-						}
-						else {
-							unsigned int dayint;
-							unsigned int monthint;
-
-							char subject[64] = "";
-
-							printf("CLIENTE> Introduzca el asunto del mensaje: ");
-							gets_s(subject, sizeof(subject));
-
-							// Validate day and month
-							do {
-
-
-
-
-								printf("CLIENTE> Introduzca el día: ");
-								scanf_s("%u", &dayint);
-
-								printf("CLIENTE> Introduzca el mes: ");
-								scanf_s("%u", &monthint);
-
-								if (monthint < 1 || monthint > 12 || dayint < 1 || dayint > days_in_month(monthint)) {
-									printf("CLIENTE> ERROR: Día o mes inválido.\r\n");
-								}
-
-								while (getchar() != '\n'); // Clears the input buffer after reading the data.
-
-							} while (monthint < 1 || monthint > 12 || dayint < 1 || dayint > days_in_month(monthint));
-
-
-							// Generar un correo de un solo mensaje "subject:asuntoCRLFCRLF mensaje CRLF.CRLF"
-							sprintf_s(buffer_out, sizeof(buffer_out), "subject:%s%s%s%s%s.%s", subject, CRLF, CRLF, input, CRLF, CRLF);
-
-						}
+						
 						break;
 					}
 
