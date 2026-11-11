@@ -37,6 +37,9 @@ int main(int* argc, char* argv[])
 	struct sockaddr_in6 server_in6;
 	int address_size = sizeof(server_in4);
 	char buffer_in[1024], buffer_out[1024], input[1024];
+	char sender[256]; //For the sender's email address
+	char recipient[256]; //For the recipient's email address
+	int recipient_count = 0; //Number of recipients
 	int received = 0, sent = 0;
 	int status;
 	char option;
@@ -156,14 +159,41 @@ int main(int* argc, char* argv[])
 						}
 						break;
 					case S_MAIL:
-						printf("CLIENTE> Introduzca la clave (enter para salir): ");
+						printf("CLIENTE> Introduzca la direccion del remitente (enter para salir): ");
 						gets_s(input, sizeof(input));
+
 						if (strlen(input) == 0) {
 							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", QUIT, CRLF);
 							status = S_QUIT;
 						}
-						else
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", MAIL, input, CRLF);
+						else {
+							strcpy_s(sender, sizeof(sender), input);
+							recipient_count = 0;
+
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s<%s>%s", MAIL, sender, CRLF);
+							//To sent de mail command with the following format: "MAIL FROM:<sender_email>\r\n"
+						}
+						break;
+					case S_RCPT:
+						printf("CLIENTE> Introduzca un destinatario (enter para finalizar): ");
+						gets_s(input, sizeof(input));
+
+						if (strlen(input) == 0) {
+							if (recipient_count > 0) {
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", DATA, CRLF);
+								status = S_DATA;
+							}
+							else {
+								printf("CLIENTE> Debe introducir al menos un destinatario\r\n");
+							}
+						}
+						else {
+							if (recipient_count == 0) {
+								strcpy_s(recipient, sizeof(recipient), input);
+							}
+
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s<%s>%s", RCPT, input, CRLF);
+						}
 						break;
 
 					case S_DATA:
@@ -284,6 +314,26 @@ int main(int* argc, char* argv[])
 							else {
 								printf("CLIENTE> Error al ejecutar HELO\r\n");
 								status = S_QUIT;
+							}
+							break;
+						case S_MAIL:
+							if (strncmp(buffer_in, ST250, 3) == 0) {
+								status = S_RCPT;
+							}
+							else {
+								printf("CLIENTE> El servidor ha rechazado el remitente\r\n");
+								status = S_MAIL;
+							}
+							break;
+
+						case S_RCPT:
+							if (strncmp(buffer_in, ST250, 3) == 0) {
+								recipient_count++;
+								status = S_RCPT;
+							}
+							else {
+								printf("CLIENTE> El servidor ha rechazado el destinatario\r\n");
+								status = S_RCPT;
 							}
 							break;
 
