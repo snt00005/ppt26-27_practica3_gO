@@ -55,6 +55,8 @@
 #define S_DATA 4
 #define S_WRITE 5
 #define S_QUIT 6
+#define S_EXIT 7
+#define S_RESET 10
 
 // SERVICE PORT
 #define TCP_SERVICE_PORT 25
