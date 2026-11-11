@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Práctica 1\práctica1_snt00005\cliente.c" />
+    <ClCompile Include="cliente.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Práctica 1\práctica1_snt00005\protocol.h" />
