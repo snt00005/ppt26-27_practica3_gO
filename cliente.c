@@ -6,7 +6,7 @@
  * Universidad de Jaén
  *
  *******************************************************
- * Práctica 1
+ * Práctica 3
  *******************************************************
  * Fichero: cliente.c
  * Versión: 3.3
@@ -25,18 +25,9 @@
 #include <conio.h>		// Biblioteca de entrada salida básica
 #include <locale.h>		// Para establecer el idioma de la codificación de texto, números, etc.
 #include "protocol.h"	// Declarar constantes y funciones de la práctica
+#include <string.h>
 
 #pragma comment(lib, "Ws2_32.lib")//Inserta en la vinculación (linking) la biblioteca Ws2_32.lib
-
- //Check if the day exists in the month selected
-int days_in_month(int month) { 
-	if (month == 2) //28 days on February
-		return 28;
-	else if (month == 4 || month == 6 || month == 9 || month == 11) //April, June, September and November have 30 days
-		return 30;
-	else
-		return 31; //The remaining months have 31 days
-}
 
 int main(int* argc, char* argv[])
 {
@@ -89,7 +80,7 @@ int main(int* argc, char* argv[])
 			ipversion = AF_INET;
 		}
 
-		sockfd = socket(ipversion, SOCK_STREAM, 0); 
+		sockfd = socket(ipversion, SOCK_STREAM, 0);
 		//SOCKET: Creates a socket and links it to a service provider.
 		//SOCKET: The first parameter "ipversion" indicates the address family defined previously.
 		//SOCKET:  AF_INET is used for IPv4 and AF_INET6 for IPv6.
@@ -120,7 +111,7 @@ int main(int* argc, char* argv[])
 				server_in4.sin_family = AF_INET;
 				server_in4.sin_port = htons(TCP_SERVICE_PORT);
 				inet_pton(ipversion, ipdest, &server_in4.sin_addr.s_addr);
-				server_in = (struct sockaddr*) & server_in4;
+				server_in = (struct sockaddr*)&server_in4;
 				address_size = sizeof(server_in4);
 			}
 
@@ -129,7 +120,7 @@ int main(int* argc, char* argv[])
 				server_in6.sin6_family = AF_INET6;
 				server_in6.sin6_port = htons(TCP_SERVICE_PORT);
 				inet_pton(ipversion, ipdest, &server_in6.sin6_addr);
-				server_in = (struct sockaddr*) & server_in6;
+				server_in = (struct sockaddr*)&server_in6;
 				address_size = sizeof(server_in6);
 			}
 
@@ -137,12 +128,12 @@ int main(int* argc, char* argv[])
 			status = S_INIT;
 
 			if (connect(sockfd, server_in, address_size) == 0) {
-			//SOCKET: Requests to establish a connection with a remote machine.
-			//SOCKET: The first parameter corresponds to the descriptor of the created socket, stored in "sockfd".
-			//SOCKET: The second parameter "server_in" refers to the protocol address of the destination socket.
-			//SOCKET: The third parameter "address_size" specifies the size in bytes of the server address structure.
-			//SOCKET: Returns 0 if the operation was successful.
-			//SOCKET: In case of an error, it returns SOCKET_ERROR (-1).
+				//SOCKET: Requests to establish a connection with a remote machine.
+				//SOCKET: The first parameter corresponds to the descriptor of the created socket, stored in "sockfd".
+				//SOCKET: The second parameter "server_in" refers to the protocol address of the destination socket.
+				//SOCKET: The third parameter "address_size" specifies the size in bytes of the server address structure.
+				//SOCKET: Returns 0 if the operation was successful.
+				//SOCKET: In case of an error, it returns SOCKET_ERROR (-1).
 
 				printf("CLIENTE> CONEXION ESTABLECIDA CON %s:%d\r\n", ipdest, TCP_SERVICE_PORT);
 
@@ -153,9 +144,9 @@ int main(int* argc, char* argv[])
 						// Se recibe el mensaje de bienvenida
 						break;
 					case S_HELO:
-						// establece la conexion de aplicacion 
 						printf("CLIENTE> Introduzca el dominio (enter para salir): ");
 						gets_s(input, sizeof(input));
+
 						if (strlen(input) == 0) {
 							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", QUIT, CRLF);
 							status = S_QUIT;
@@ -191,26 +182,26 @@ int main(int* argc, char* argv[])
 							status = S_QUIT;
 						}
 						else {
-							
 							unsigned int dayint;
 							unsigned int monthint;
 
 							char subject[64] = "";
 
-							printf("CLIENTE> Introduzca el asunto: ");
-							gets_s(input, sizeof(input));
-
-							//
-
+							printf("CLIENTE> Introduzca el asunto del mensaje: ");
+							gets_s(subject, sizeof(subject));
 
 							// Validate day and month
 							do {
+
+
+
+
 								printf("CLIENTE> Introduzca el día: ");
 								scanf_s("%u", &dayint);
 
 								printf("CLIENTE> Introduzca el mes: ");
 								scanf_s("%u", &monthint);
-								
+
 								if (monthint < 1 || monthint > 12 || dayint < 1 || dayint > days_in_month(monthint)) {
 									printf("CLIENTE> ERROR: Día o mes inválido.\r\n");
 								}
@@ -219,21 +210,11 @@ int main(int* argc, char* argv[])
 
 							} while (monthint < 1 || monthint > 12 || dayint < 1 || dayint > days_in_month(monthint));
 
-							// Generate ROOM message
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s %u %u%s", ROOM, input, dayint, monthint, CRLF);
+
+							// Generar un correo de un solo mensaje "subject:asuntoCRLFCRLF mensaje CRLF.CRLF"
+							sprintf_s(buffer_out, sizeof(buffer_out), "subject:%s%s%s%s%s.%s", subject, CRLF, CRLF, input, CRLF, CRLF);
+
 						}
-						//Temporary code to test ERROR 1
-						/*sprintf_s(buffer_out, sizeof(buffer_out), "HELLO%s", CRLF);
-						status = S_QUIT;*/
-
-						//Temporary code to test ERROR 2
-						/*sprintf_s(buffer_out, sizeof(buffer_out), "ROOM cw00 20%s", CRLF);
-						status = S_QUIT;*/
-
-						//Temporary code to test ERROR 3
-						/*sprintf_s(buffer_out, sizeof(buffer_out), "ROOM cw00 32 2%s", CRLF);
-						status = S_QUIT;*/
-
 						break;
 					}
 
@@ -252,7 +233,7 @@ int main(int* argc, char* argv[])
 						if (sent == SOCKET_ERROR) {
 							status = S_QUIT;
 							continue;// La sentencia continue hace que la ejecución dentro de un
-									 // bucle salte hasta la comprobación del mismo.
+							// bucle salte hasta la comprobación del mismo.
 						}
 					}
 
@@ -284,45 +265,33 @@ int main(int* argc, char* argv[])
 						buffer_in[received] = 0x00;
 						printf(buffer_in);
 
-						// Motor de transición de estados
+						// State transition engine
 						switch (status) {
-							case S_INIT:
-								if (strcmp(buffer_in, ST220, 3) == 0) {
-									status = S_HELO;
-								}
-								break;
-							case S_HELO:
-								if (strcmp(buffer_in, ST250, 3) == 0) { //Mirar qué codigo de estado necesita según RFC 5321
-									status = S_MAIL;
-								}
-								break;
-							case S_MAIL:
-								break;
-							case S_RCPT:
-								/*
-								IF (OK)
-									IF (OTRO?)
-										status = S_RCPT;
-									ELSE
-										status = S_DATA;
-								ELSE 
-									status = S_RCPT;
+						case S_INIT:
+							if (strncmp(buffer_in, ST220, 3) == 0) {
+								status = S_HELO;
+							}
+							else {
+								printf("CLIENTE> Error en el mensaje de bienvenida\r\n");
+								status = S_QUIT;
+							}
+							break;
 
+						case S_HELO:
+							if (strncmp(buffer_in, ST250, 3) == 0) {
+								status = S_MAIL;
+							}
+							else {
+								printf("CLIENTE> Error al ejecutar HELO\r\n");
+								status = S_QUIT;
+							}
+							break;
 
-								
-								*/
-								break;
-							case S_DATA:
-
-								break;
-
-						}
-						if (status != S_DATA && strncmp(buffer_in, OK, 2) == 0){
-							status++;
-						}
-						//Si la autenticación no es correcta se vuelve al estado S_USER
-						if (status == S_PASS && strncmp(buffer_in, OK, 2) != 0) {
-							status = S_HELO;
+						case S_QUIT:
+							if (strncmp(buffer_in, ST221, 3) == 0) {
+								printf("CLIENTE> Sesion SMTP cerrada correctamente\r\n");
+							}
+							break;
 						}
 					}
 
@@ -332,7 +301,7 @@ int main(int* argc, char* argv[])
 				int error_code = GetLastError();
 				printf("CLIENTE> ERROR AL CONECTAR CON %s:%d\r\n", ipdest, TCP_SERVICE_PORT);
 			}
-			
+
 			if (closesocket(sockfd) == SOCKET_ERROR) {
 				//SOCKET: Closes the socket and frees the resources associated with it
 				//SOCKET: The parameter "sockfd" specifies the socket descriptor to be closed.
@@ -356,15 +325,15 @@ int main(int* argc, char* argv[])
  * Tool: ChatGPT (GPT-5.6 Luna)
  *
  * Query 1:
- * "I have written comments in English to explain the use of socket primitives in this practical assignment. 
+ * "I have written comments in English to explain the use of socket primitives in this practical assignment.
  * Please review them and check for grammatical mistakes or suggest more appropriate terms."
  *
  * Result:
- * A detailed review of the English wording and improvements to the comments, using appropriate terminology 
+ * A detailed review of the English wording and improvements to the comments, using appropriate terminology
  * and expressions.
  *
  * Query 2:
- * "I have declared two variables as 'unsigned int dayint' and 'unsigned int monthint'. When printing their 
+ * "I have declared two variables as 'unsigned int dayint' and 'unsigned int monthint'. When printing their
  * values, should I use %u? Explain why %u is used instead of %i or %d."
  *
  * Result:
@@ -386,12 +355,12 @@ int main(int* argc, char* argv[])
  * reading them with scanf_s().
  *
  * Query 3:
- * "What is the purpose of the gets_s(input, sizeof(input)) function in C? Explain how it works and provide an 
+ * "What is the purpose of the gets_s(input, sizeof(input)) function in C? Explain how it works and provide an
  * example of how to use it to read a room code entered by the user."
  *
  * Result:
- * The gets_s() function reads a string entered by the user from the keyboard, including spaces, until the 
- * Enter key is pressed. The second argument, sizeof(input), specifies the size of the buffer, allowing 
+ * The gets_s() function reads a string entered by the user from the keyboard, including spaces, until the
+ * Enter key is pressed. The second argument, sizeof(input), specifies the size of the buffer, allowing
  * the function to limit the number of characters stored and helping prevent writing beyond the buffer's bounds.
  *
  * Example:
