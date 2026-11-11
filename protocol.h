@@ -6,48 +6,48 @@
  * Universidad de Jaén
  *
  *******************************************************
- * Práctica 1
+ * Práctica 3
  *******************************************************
  * Fichero: protocol.h
  * Versión: 4.1
  * Curso: 2026/2027
- * Descripción: Fichero de encabezado para práctica 1
+ * Descripción: Fichero de encabezado para práctica 3
  * Autor: Juan Carlos Cuevas Martínez
  *
- *******************************************************
+ ******************************************************
  * PONGA SU NOMBRE AQUÍ:
  * Estudiante 1: Sara Núñez Torres
  * Estudiante 2 [si lo hubiera]:
  *
  ******************************************************/
+
 #ifndef protocolostpte_practicas_headerfile
 #define protocolostpte_practicas_headerfile
-#endif
 
-// COMANDOS DE APLICACION
+ // APPLICATION COMMANDS
 #define HELO "HELO"
-#define MAIL "MAIL FROM: "
+#define MAIL "MAIL FROM:"
+#define RCPT "RCPT TO:"
+#define DATA "DATA"
 #define QUIT "QUIT"
 #define ECHO "ECHO"
-#define ROOM "ROOM" //Command created for task 4
+#define ROOM "ROOM"
 
-
-// RESPUESTAS A COMANDOS DE APLICACION
 // SMTP SERVER RESPONSES
 #define ST220 "220"
-#define ST221 "221" //Server closing transmission channel
+#define ST221 "221"
 #define ST250 "250"
+#define ST354 "354"
 
-//Respuestas adaptadas a la práctica 3 y al protocolo SMTP incluyendo códigos de estados
-#define OK  "OK"
-#define ER  "ER"
-#define NA	"NA" //Response created for task 5
+// APPLICATION RESPONSES
+#define OK "OK"
+#define ER "ER"
+#define NA "NA"
 
-//FIN DE RESPUESTA
+// END OF RESPONSE
 #define CRLF "\r\n"
 
-//ESTADOS
-// Cambiar estados para la práctica 3, DATA se sigue necesitando
+// STATES
 #define S_INIT 0
 #define S_HELO 1
 #define S_MAIL 2
@@ -56,12 +56,11 @@
 #define S_WRITE 5
 #define S_QUIT 6
 
+// SERVICE PORT
+#define TCP_SERVICE_PORT 25
 
-//PUERTO DEL SERVICIO
-#define TCP_SERVICE_PORT	25 //Puerto cambiado para SMTP Pr3
+// AUTHORISED USER AND PASSWORD
+#define TEST_USER "user"
+#define TEST_PASSWORD "1234"
 
-// NOMBRE Y CLAVE AUTORIZADOS
-// Nota: esto no se debe hacer nunca, es solamente para simplificar el funcionamiento del
-// servidor, el cual debería almacenar estos datos en una base de datos de forma segura.
-#define TEST_USER		"user" 
-#define TEST_PASSWORD	"1234"
+#endif
