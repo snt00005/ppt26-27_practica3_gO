@@ -38,7 +38,6 @@ int main(int* argc, char* argv[])
 	int address_size = sizeof(server_in4);
 	char buffer_in[1024], buffer_out[1024], input[1024];
 	char sender[256]; //For the sender's email address
-	char recipient[256]; //For the recipient's email address
 	int recipient_count = 0; //Number of recipients
 	int received = 0, sent = 0;
 	int status;
@@ -46,6 +45,7 @@ int main(int* argc, char* argv[])
 	char subject[1024];
 	char from[1024];
 	char to[1024];
+	char email[1024];
 	int headers = 0;
 	int sending = 0;
 
@@ -193,21 +193,27 @@ int main(int* argc, char* argv[])
 							}
 							else {
 								printf("CLIENTE> Debe introducir al menos un destinatario\r\n");
+								continue;
 							}
 						}
 						else {
-							if (recipient_count == 0) {
-								strcpy_s(recipient, sizeof(recipient), input);
-							}
-
 							sprintf_s(buffer_out, sizeof(buffer_out), "%s<%s>%s", RCPT, input, CRLF);
 						}
 						break;
 
 					case S_DATA:
-						
+						sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", DATA, CRLF);
+						break;
+
+					case S_WRITE:
+						sending = 1;
+						if (headers == 0) {
+							sprintf_s(buffer_out, sizeof(buffer_out), "Subject: Práctica 1%s%sSara Núñez Torres%s.%s", CRLF, CRLF, CRLF, CRLF);
+							headers = 1;
+						}
 						break;
 					}
+
 
 					if (status != S_INIT) {
 						sent = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);
@@ -222,91 +228,123 @@ int main(int* argc, char* argv[])
 						//SOCKET: If the operation fails, it returns SOCKET_ERROR (-1).
 
 						if (sent == SOCKET_ERROR) {
-							status = S_QUIT;
+							status = S_EXIT;
 							continue;// La sentencia continue hace que la ejecución dentro de un
 							// bucle salte hasta la comprobación del mismo.
 						}
+						
+						if (status == S_WRITE) {
+							sending = 0;
+						}
 					}
 
-					received = recv(sockfd, buffer_in, 512, 0);
-					//SOCKET: Receiving data using TCP.
-					//SOCKET: The first parameter "sockfd" identifies the local socket used to receive the data.
-					//SOCKET: The second parameter "buffer_in" is the buffer where the received data is stored.
-					//SOCKET: The third parameter indicates the size in bytes of the reception buffer (the data cannot exceed this size).
-					//SOCKET: The last parameter modifies the behaviour of the function.
-					//SOCKET: The value 0 indicates normal operation, where all available data
-					//SOCKET: in the TCP buffer is copied into "buffer_in" without exceeding the limit imposed by the buffer.
-					//SOCKET: The data read is removed from the buffer.
-					//SOCKET: Returns the number of bytes received if the operation is successful.
-					//SOCKET: Returns 0 if the connection has been closed orderly by the remote end.
-					//SOCKET: If the operation fails, it returns SOCKET_ERROR (-1).
-
-					if (received <= 0) {
-						DWORD error = GetLastError();
-						if (received < 0) {
-							printf("CLIENTE> Error %d en la recepción de datos\r\n", error);
-							status = S_QUIT;
+					if (sending == 0) {
+						received = recv(sockfd, buffer_in, 512, 0);
+						//SOCKET: Receiving data using TCP.
+						//SOCKET: The first parameter "sockfd" identifies the local socket used to receive the data.
+						//SOCKET: The second parameter "buffer_in" is the buffer where the received data is stored.
+						//SOCKET: The third parameter indicates the size in bytes of the reception buffer (the data cannot exceed this size).
+						//SOCKET: The last parameter modifies the behaviour of the function.
+						//SOCKET: The value 0 indicates normal operation, where all available data
+						//SOCKET: in the TCP buffer is copied into "buffer_in" without exceeding the limit imposed by the buffer.
+						//SOCKET: The data read is removed from the buffer.
+						//SOCKET: Returns the number of bytes received if the operation is successful.
+						//SOCKET: Returns 0 if the connection has been closed orderly by the remote end.
+						//SOCKET: If the operation fails, it returns SOCKET_ERROR (-1).
+						if (received <= 0) {
+							DWORD error = GetLastError();
+							if (received < 0) {
+								printf("CLIENTE> Error %d en la recepción de datos\r\n", error);
+								status = S_QUIT;
+							}
+							else {
+								printf("CLIENTE> Conexión con el servidor cerrada\r\n");
+								status = S_QUIT;
+							}
 						}
 						else {
-							printf("CLIENTE> Conexión con el servidor cerrada\r\n");
-							status = S_QUIT;
+							buffer_in[received] = 0x00;
+							printf(buffer_in);
+
+							// State transition engine
+							switch (status) {
+							case S_INIT:
+								if (strncmp(buffer_in, ST220, 3) == 0) {
+									status = S_HELO;
+								}
+								else {
+									printf("CLIENTE> Error en el mensaje de bienvenida\r\n");
+									status = S_QUIT;
+								}
+								break;
+
+							case S_HELO:
+								if (strncmp(buffer_in, ST250, 3) == 0) {
+									status = S_MAIL;
+								}
+								else {
+									printf("CLIENTE> Error al ejecutar HELO\r\n");
+									status = S_QUIT;
+								}
+								break;
+							case S_MAIL:
+								if (strncmp(buffer_in, ST250, 3) == 0) {
+									status = S_RCPT;
+								}
+								else {
+									printf("CLIENTE> El servidor ha rechazado el remitente\r\n");
+									status = S_MAIL;
+								}
+								break;
+
+							case S_RCPT:
+								if (strncmp(buffer_in, ST250, 3) == 0) {
+									recipient_count++;
+									status = S_RCPT;
+								}
+								else {
+									printf("CLIENTE> El servidor ha rechazado el destinatario\r\n");
+									status = S_RCPT;
+								}
+								break;
+							case S_DATA:
+								if (strncmp(buffer_in, ST354, 3) == 0) {
+									status = S_WRITE;
+								}
+								else {
+									printf("CLIENTE> El servidor ha rechazado el comando DATA\r\n");
+									status = S_QUIT;
+								}
+								break;
+							case S_WRITE:
+								if (strncmp(buffer_in, ST250, 3) == 0) {
+									headers = 0;
+
+									printf("CLIENTE> ¿Quiere enviar otro correo? (S para otro o cualquier tecla para salir): ");
+									option = _getche();
+
+									if (option == 's' || option == 'S') {
+										status = S_MAIL;
+									}
+									else {
+										status = S_QUIT;
+									}
+								}
+								else {
+									printf("CLIENTE> Mensaje rechazado por el servidor\r\n");
+									status = S_QUIT;
+								}
+								break;
+							case S_QUIT:
+								if (strncmp(buffer_in, ST221, 3) == 0) {
+									printf("CLIENTE> Sesion SMTP cerrada correctamente\r\n");
+								}
+								status = S_EXIT;
+								break;
+							}
 						}
 					}
-					else {
-						buffer_in[received] = 0x00;
-						printf(buffer_in);
-
-						// State transition engine
-						switch (status) {
-						case S_INIT:
-							if (strncmp(buffer_in, ST220, 3) == 0) {
-								status = S_HELO;
-							}
-							else {
-								printf("CLIENTE> Error en el mensaje de bienvenida\r\n");
-								status = S_QUIT;
-							}
-							break;
-
-						case S_HELO:
-							if (strncmp(buffer_in, ST250, 3) == 0) {
-								status = S_MAIL;
-							}
-							else {
-								printf("CLIENTE> Error al ejecutar HELO\r\n");
-								status = S_QUIT;
-							}
-							break;
-						case S_MAIL:
-							if (strncmp(buffer_in, ST250, 3) == 0) {
-								status = S_RCPT;
-							}
-							else {
-								printf("CLIENTE> El servidor ha rechazado el remitente\r\n");
-								status = S_MAIL;
-							}
-							break;
-
-						case S_RCPT:
-							if (strncmp(buffer_in, ST250, 3) == 0) {
-								recipient_count++;
-								status = S_RCPT;
-							}
-							else {
-								printf("CLIENTE> El servidor ha rechazado el destinatario\r\n");
-								status = S_RCPT;
-							}
-							break;
-
-						case S_QUIT:
-							if (strncmp(buffer_in, ST221, 3) == 0) {
-								printf("CLIENTE> Sesion SMTP cerrada correctamente\r\n");
-							}
-							break;
-						}
-					}
-
-				} while (status != S_QUIT);
+				} while (status != S_EXIT);
 			}
 			else {
 				int error_code = GetLastError();
