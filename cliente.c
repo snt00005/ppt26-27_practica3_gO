@@ -297,10 +297,6 @@ int main(int* argc, char* argv[])
 							continue;// La sentencia continue hace que la ejecución dentro de un
 							// bucle salte hasta la comprobación del mismo.
 						}
-						
-						if (status == S_WRITE) {
-							sending = 0;
-						}
 					}
 
 					if (sending == 0) {
@@ -372,6 +368,7 @@ int main(int* argc, char* argv[])
 									status = S_RCPT;
 								}
 								break;
+
 							case S_DATA:
 								if (strncmp(buffer_in, ST354, 3) == 0) {
 									status = S_WRITE;
@@ -381,6 +378,7 @@ int main(int* argc, char* argv[])
 									status = S_QUIT;
 								}
 								break;
+
 							case S_WRITE:
 								if (strncmp(buffer_in, ST250, 3) == 0) {
 									headers = 0;
@@ -400,6 +398,19 @@ int main(int* argc, char* argv[])
 									status = S_QUIT;
 								}
 								break;
+
+							case S_RSET:
+								if (strncmp(buffer_in, ST250, 3) == 0) {
+									printf("CLIENTE> Transaccion reiniciada correctamente\r\n");
+									status = S_MAIL;
+									recipient_count = 0; // Reset the recipient count when the transaction is reset
+								}
+								else {
+									printf("CLIENTE> Error al reiniciar la transaccion\r\n");
+									status = S_QUIT;
+								}
+								break;
+
 							case S_QUIT:
 								if (strncmp(buffer_in, ST221, 3) == 0) {
 									printf("CLIENTE> Sesion SMTP cerrada correctamente\r\n");
