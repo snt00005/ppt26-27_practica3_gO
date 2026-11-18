@@ -38,18 +38,17 @@ int main(int* argc, char* argv[])
 	int address_size = sizeof(server_in4);
 	char buffer_in[1024], buffer_out[1024], input[1024];
 	char sender[256]; //For the sender's email address
-	int recipient_count = 0; //Number of recipients
 	int received = 0, sent = 0;
 	int status;
 	char option;
 	char subject[1024];
 	char from[1024];
 	char to[1024];
-	char email[1024];
 	int headers = 0;
 	int sending = 0;
+	int recipient_count = 0; //Number of recipients
 
-	int reset_requested = 0;
+
 
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
@@ -152,8 +151,9 @@ int main(int* argc, char* argv[])
 				do {
 					switch (status) {
 					case S_INIT:
-						// Se recibe el mensaje de bienvenida
+						// Receive the welcome message from the server
 						break;
+
 					case S_HELO:
 						printf("CLIENTE> Introduzca el dominio (enter para salir): ");
 						gets_s(input, sizeof(input));
@@ -182,14 +182,24 @@ int main(int* argc, char* argv[])
 							//To sent de mail command with the following format: "MAIL FROM:<sender_email>\r\n"
 						}
 						break;
+
 					case S_RCPT:
 						printf("CLIENTE> Introduzca un destinatario (enter para finalizar): ");
 						gets_s(input, sizeof(input));
 
 						if (strlen(input) == 0) {
 							if (recipient_count > 0) {
-								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", DATA, CRLF);
-								status = S_DATA;
+								printf("CLIENTE> ¿Desea reiniciar el proceso de envio? (S/N): ");
+								option = _getche();
+
+								if (option == 's' || option == 'S') {
+									status = S_RESET;
+								}
+								else {
+									status = S_DATA;
+								}
+
+								continue;
 							}
 							else {
 								printf("CLIENTE> Debe introducir al menos un destinatario\r\n");
@@ -207,10 +217,65 @@ int main(int* argc, char* argv[])
 
 					case S_WRITE:
 						sending = 1;
+
+						// Headers are sent only once, at the beginning of the message. After that, only the body lines are sent.
 						if (headers == 0) {
-							sprintf_s(buffer_out, sizeof(buffer_out), "Subject: Práctica 1%s%sSara Núñez Torres%s.%s", CRLF, CRLF, CRLF, CRLF);
+
+							do {
+								printf("CLIENTE> Introduzca el asunto: ");
+								gets_s(subject, sizeof(subject));
+
+								if (strlen(subject) + strlen("Subject: ") > 998) { 
+									// Check if the subject line exceeds the maximum length of 998 characters (1000 characters with CRLF), including the "Subject: " prefix.
+									printf("CLIENTE> El asunto es demasiado largo. Intentelo de nuevo.\r\n");
+								}
+							} while (strlen(subject) + strlen("Subject: ") > 998);
+
+							do {
+								printf("CLIENTE> Introduzca el nombre del remitente: ");
+								gets_s(from, sizeof(from));
+
+								if (strlen(from) + strlen("From: ") > 998) {
+									printf("CLIENTE> El remitente es demasiado largo. Intentelo de nuevo.\r\n");
+								}
+							} while (strlen(from) + strlen("From: ") > 998);
+
+							do {
+								printf("CLIENTE> Introduzca el nombre del destinatario: ");
+								gets_s(to, sizeof(to));
+
+								if (strlen(to) + strlen("To: ") > 998) {
+									printf("CLIENTE> El destinatario es demasiado largo. Intentelo de nuevo.\r\n");
+								}
+							} while (strlen(to) + strlen("To: ") > 998);
+
+							sprintf_s(buffer_out, sizeof(buffer_out), "Subject: %s%sFrom: %s%sTo: %s%s%s", subject, CRLF, from, CRLF, to, CRLF, CRLF);
+
 							headers = 1;
 						}
+						else {
+							printf("CLIENTE> Introduzca una linea del mensaje (punto para terminar): ");
+							gets_s(input, sizeof(input));
+
+							if (strlen(input) > 998) {
+								printf("CLIENTE> La linea es demasiado larga. Intentelo de nuevo.\r\n");
+								continue;
+							}
+
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", input, CRLF);
+
+							// Check if the line is a single dot, which indicates the end of the message body in SMTP.
+							if (strcmp(input, ".") == 0) {
+								sending = 0;
+							}
+						}
+						break;
+
+					case S_RSET:
+						sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", RSET, CRLF);
+						break;
+					case S_QUIT:
+						sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", QUIT, CRLF);
 						break;
 					}
 
@@ -320,7 +385,7 @@ int main(int* argc, char* argv[])
 								if (strncmp(buffer_in, ST250, 3) == 0) {
 									headers = 0;
 
-									printf("CLIENTE> ¿Quiere enviar otro correo? (S para otro o cualquier tecla para salir): ");
+									printf("CLIENTE> ¿Quiere enviar otro correo? (S para otro o cualquier tecla para salir): \r\n");
 									option = _getche();
 
 									if (option == 's' || option == 'S') {
