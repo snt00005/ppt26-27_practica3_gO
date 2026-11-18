@@ -23,6 +23,7 @@
 
 #ifndef protocolostpte_practicas_headerfile
 #define protocolostpte_practicas_headerfile
+#endif
 
  // APPLICATION COMMANDS
 #define HELO "HELO"
@@ -30,8 +31,8 @@
 #define RCPT "RCPT TO:"
 #define DATA "DATA"
 #define QUIT "QUIT"
-#define ECHO "ECHO"
-#define ROOM "ROOM"
+#define RSET "RSET"
+#define QUIT "QUIT"
 
 // SMTP SERVER RESPONSES
 #define ST220 "220"
@@ -64,5 +65,3 @@
 // AUTHORISED USER AND PASSWORD
 #define TEST_USER "user"
 #define TEST_PASSWORD "1234"
-
-#endif
