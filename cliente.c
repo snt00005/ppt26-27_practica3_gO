@@ -193,7 +193,7 @@ int main(int* argc, char* argv[])
 								option = _getche();
 
 								if (option == 's' || option == 'S') {
-									status = S_RESET;
+									status = S_RSET;
 								}
 								else {
 									status = S_DATA;
