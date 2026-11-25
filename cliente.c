@@ -423,6 +423,9 @@ int main(int* argc, char* argv[])
 								if (strncmp(buffer_in, ST221, 3) == 0) {
 									printf("CLIENTE> Sesion SMTP cerrada correctamente\r\n");
 								}
+								else {
+									printf("CLIENTE> Error al cerrar la sesion SMTP\r\n");
+								}
 								status = S_EXIT;
 								break;
 							}
