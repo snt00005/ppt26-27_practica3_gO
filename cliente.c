@@ -218,6 +218,13 @@ int main(int* argc, char* argv[])
 					case S_WRITE:
 						sending = 1;
 
+						/* Task 3: Sending an email in a single line
+						* sprintf_s(buffer_out, sizeof(buffer_out), "Subject: Práctica 1%s%s%s%s.%s", CRLF, CRLF, "Sara Núñez Torres", CRLF, CRLF);
+						*
+						* The previous line is removed and replaced with the following code to allow the user to enter the email subject, 
+						* sender and recipient, as well as the message body, separately.
+						*/
+
 						// Headers are sent only once, at the beginning of the message. After that, only the body lines are sent.
 						if (headers == 0) {
 
