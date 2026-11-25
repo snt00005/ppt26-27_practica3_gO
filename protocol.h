@@ -39,6 +39,14 @@
 #define ST250 "250"
 #define ST251 "251"
 #define ST354 "354"
+#define ST450 "450"
+#define ST451 "451"
+#define ST503 "503"
+#define ST504 "504"
+#define ST550 "550"
+#define ST552 "552"
+#define ST554 "554"
+
 
 // APPLICATION RESPONSES
 #define OK "OK"

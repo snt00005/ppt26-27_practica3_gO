@@ -339,6 +339,10 @@ int main(int* argc, char* argv[])
 								if (strncmp(buffer_in, ST220, 3) == 0) {
 									status = S_HELO;
 								}
+								else if (strncmp(buffer_in, ST554, 3) == 0) {
+									printf("CLIENTE> Error: Servicio no disponible\r\n");
+									status = S_QUIT;
+								}
 								else {
 									printf("CLIENTE> Error en el mensaje de bienvenida\r\n");
 									status = S_QUIT;
@@ -349,6 +353,14 @@ int main(int* argc, char* argv[])
 								if (strncmp(buffer_in, ST250, 3) == 0) {
 									status = S_MAIL;
 								}
+								else if (strncmp(buffer_in, ST504, 3) == 0) {
+									printf("CLIENTE> Error: Comando HELO no soportado\r\n");
+									status = S_QUIT;
+								}
+								else if (strncmp(buffer_in, ST550, 3) == 0) {
+									printf("CLIENTE> Error: Comando HELO rechazado por el servidor\r\n");
+									status = S_QUIT;
+								}
 								else {
 									printf("CLIENTE> Error al ejecutar HELO\r\n");
 									status = S_QUIT;
@@ -357,6 +369,18 @@ int main(int* argc, char* argv[])
 							case S_MAIL:
 								if (strncmp(buffer_in, ST250, 3) == 0) {
 									status = S_RCPT;
+								}
+								else if (strncmp(buffer_in, ST550, 3) == 0) {
+									printf("CLIENTE> Error: Remitente rechazado. Buzón no disponible\r\n");
+									status = S_MAIL;
+								}
+								else if (strncmp(buffer_in, ST503, 3) == 0) {
+									printf("CLIENTE> Error: Sequencia de comandos SMTP incorrecta\r\n");
+									status = S_QUIT;
+								}
+								else if (strncmp(buffer_in, ST451, 3) == 0) {
+									printf("CLIENTE> Error temporal de procesamiento\r\n");
+									status = S_MAIL;
 								}
 								else {
 									printf("CLIENTE> El servidor ha rechazado el remitente\r\n");
@@ -369,6 +393,18 @@ int main(int* argc, char* argv[])
 									// If the server responds with 250 or 251 (user not local), it means the recipient is accepted.
 									recipient_count++;
 									status = S_RCPT;
+								} 
+								else if (strncmp(buffer_in, ST550, 3) == 0) {
+									printf("CLIENTE> Error: Destinatario rechazado. Buzón no disponible\r\n");
+									status = S_RCPT;
+								}
+								else if (strncmp(buffer_in, ST553, 3) == 0) {
+									printf("CLIENTE> Error: Destinatario rechazado. Dirección no válida\r\n");
+									status = S_RCPT;
+								}
+								else if (strncmp(buffer_in, ST450, 3) == 0) {
+									printf("CLIENTE> Error: Buzón temporalmente no disponible\r\n");
+									status = S_RCPT;
 								}
 								else {
 									printf("CLIENTE> El servidor ha rechazado el destinatario\r\n");
@@ -379,6 +415,10 @@ int main(int* argc, char* argv[])
 							case S_DATA:
 								if (strncmp(buffer_in, ST354, 3) == 0) {
 									status = S_WRITE;
+								}
+								else if (strncmp(buffer_in, ST503, 3) == 0) {
+									printf("CLIENTE> Error: Sequencia de comandos SMTP incorrecta\r\n");
+									status = S_QUIT;
 								}
 								else {
 									printf("CLIENTE> El servidor ha rechazado el comando DATA\r\n");
@@ -391,7 +431,7 @@ int main(int* argc, char* argv[])
 									headers = 0;
 
 									printf("CLIENTE> ¿Quiere enviar otro correo? (S para otro o cualquier tecla para salir): \r\n");
-									option = _getche();
+									option = _getche(); 
 
 									if (option == 's' || option == 'S') {
 										status = S_MAIL;
@@ -399,6 +439,10 @@ int main(int* argc, char* argv[])
 									else {
 										status = S_QUIT;
 									}
+								}
+								else if (strncmp(buffer_in, ST552, 3) == 0) {
+									printf("CLIENTE> Error: Buzón del remitente lleno\r\n");
+									status = S_QUIT;
 								}
 								else {
 									printf("CLIENTE> Mensaje rechazado por el servidor\r\n");
