@@ -32,7 +32,6 @@
 #define DATA "DATA"
 #define QUIT "QUIT"
 #define RSET "RSET"
-#define QUIT "QUIT"
 
 // SMTP SERVER RESPONSES
 #define ST220 "220"
