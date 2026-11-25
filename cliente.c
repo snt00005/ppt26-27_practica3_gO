@@ -366,7 +366,8 @@ int main(int* argc, char* argv[])
 								break;
 
 							case S_RCPT:
-								if (strncmp(buffer_in, ST250, 3) == 0) {
+								if (strncmp(buffer_in, ST250, 3) == 0 || strncmp(buffer_in, ST251, 3) == 0) {
+									// If the server responds with 250 or 251 (user not local), it means the recipient is accepted.
 									recipient_count++;
 									status = S_RCPT;
 								}

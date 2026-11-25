@@ -37,6 +37,7 @@
 #define ST220 "220"
 #define ST221 "221"
 #define ST250 "250"
+#define ST251 "251"
 #define ST354 "354"
 
 // APPLICATION RESPONSES
