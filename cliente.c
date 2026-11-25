@@ -323,12 +323,11 @@ int main(int* argc, char* argv[])
 							DWORD error = GetLastError();
 							if (received < 0) {
 								printf("CLIENTE> Error %d en la recepción de datos\r\n", error);
-								status = S_QUIT;
 							}
 							else {
 								printf("CLIENTE> Conexión con el servidor cerrada\r\n");
-								status = S_QUIT;
 							}
+							status = S_EXIT;
 						}
 						else {
 							buffer_in[received] = 0x00;
