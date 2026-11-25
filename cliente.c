@@ -249,6 +249,13 @@ int main(int* argc, char* argv[])
 								}
 							} while (strlen(to) + strlen("To: ") > 998);
 
+							// Check whether all headers fit in the output buffer.
+							if (strlen(subject) + strlen(from) + strlen(to) + strlen("Subject: ") + strlen("From: ") + strlen("To: ") + 4 * strlen(CRLF) >= sizeof(buffer_out)) {
+								printf("CLIENTE> Las cabeceras ocupan demasiado espacio. Intentelo de nuevo.\r\n");
+								headers = 0;
+								continue;
+							}
+
 							sprintf_s(buffer_out, sizeof(buffer_out), "Subject: %s%sFrom: %s%sTo: %s%s%s", subject, CRLF, from, CRLF, to, CRLF, CRLF);
 
 							headers = 1;
