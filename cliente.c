@@ -448,7 +448,7 @@ int main(int* argc, char* argv[])
 									}
 								}
 								else if (strncmp(buffer_in, ST552, 3) == 0) {
-									printf("CLIENTE> Error: Buzón del remitente lleno\r\n");
+									printf("CLIENTE> Error: Mensaje rechazado por exceder el limite de almacenamiento o tamaño permitido\r\n");
 									status = S_QUIT;
 								}
 								else {
