@@ -48,8 +48,6 @@ int main(int* argc, char* argv[])
 	int sending = 0;
 	int recipient_count = 0; //Number of recipients
 
-
-
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
 	char default_ip4[16] = "127.0.0.1";
@@ -166,6 +164,7 @@ int main(int* argc, char* argv[])
 							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", HELO, input, CRLF);
 						}
 						break;
+
 					case S_MAIL:
 						printf("CLIENTE> Introduzca la direccion del remitente (enter para salir): ");
 						gets_s(input, sizeof(input));
@@ -292,7 +291,6 @@ int main(int* argc, char* argv[])
 						sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", QUIT, CRLF);
 						break;
 					}
-
 
 					if (status != S_INIT) {
 						sent = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);
@@ -517,43 +515,33 @@ int main(int* argc, char* argv[])
  * Result:
  * A detailed review of the English wording and improvements to the comments, using appropriate terminology
  * and expressions.
- *
+ * 
  * Query 2:
- * "I have declared two variables as 'unsigned int dayint' and 'unsigned int monthint'. When printing their
- * values, should I use %u? Explain why %u is used instead of %i or %d."
+ * "How can I verify that the emails sent by my SMTP client have actually been received by the intended recipients, and how can I use a local email client such as Thunderbird to check the delivered messages?"
  *
  * Result:
- * The %u format specifier should be used because both variables are declared as unsigned int.
- *
- * Example:
- * unsigned int dayint;
- * unsigned int monthint;
- *
- * printf("Day: %u\n", dayint);
- * printf("Month: %u\n", monthint);
- *
- * Explanation:
- * - %d is used to print an int (signed integer).
- * - %i is also used to print an int. When used with scanf, it can interpret input numbers differently from %d.
- * - %u is used to print an unsigned int (unsigned integer).
- *
- * Therefore, %u is the appropriate format specifier for these variables. The same specifier should be used when
- * reading them with scanf_s().
+ * An explanation of how to configure a local email client such as Thunderbird
+ * to access the mailboxes configured in ArGoSoft Mail Server and verify
+ * that the messages sent by the SMTP client have been delivered and can
+ * be retrieved by the intended recipients.  
  *
  * Query 3:
- * "What is the purpose of the gets_s(input, sizeof(input)) function in C? Explain how it works and provide an
- * example of how to use it to read a room code entered by the user."
+ * "Explain the difference between an SMTP server accepting a message for delivery with a 250 response and the message actually being delivered to the recipient's mailbox."
  *
  * Result:
- * The gets_s() function reads a string entered by the user from the keyboard, including spaces, until the
- * Enter key is pressed. The second argument, sizeof(input), specifies the size of the buffer, allowing
- * the function to limit the number of characters stored and helping prevent writing beyond the buffer's bounds.
+ * An explanation of the meaning of the SMTP 250 response after message
+ * transmission, clarifying that accepting a message for delivery does not
+ * necessarily mean that it has already been retrieved or read by the
+ * recipient, and describing the distinction between message acceptance
+ * and final delivery.
  *
- * Example:
- * char input[100];
+ * Query 4:
+ * "Explain how the SMTP RSET command works and how it can be used to restart a mail transaction without closing the SMTP connection."
  *
- * printf("Enter the room code: ");
- * gets_s(input, sizeof(input));
- *
- * In this example, the user can enter a room code, such as "cw00", which is then stored in the input variable.
+ * Result:
+ * An explanation of how the RSET command resets the current SMTP mail
+ * transaction, discarding the transaction's current information and
+ * allowing the client to start a new mail transaction within the same
+ * SMTP session, without establishing a new TCP connection.
+ * 
  */

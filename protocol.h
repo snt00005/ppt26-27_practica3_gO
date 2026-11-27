@@ -48,13 +48,6 @@
 #define ST553 "553"
 #define ST554 "554"
 
-
-
-// APPLICATION RESPONSES
-#define OK "OK"
-#define ER "ER"
-#define NA "NA"
-
 // END OF RESPONSE
 #define CRLF "\r\n"
 
@@ -71,7 +64,3 @@
 
 // SERVICE PORT
 #define TCP_SERVICE_PORT 25
-
-// AUTHORISED USER AND PASSWORD
-#define TEST_USER "user"
-#define TEST_PASSWORD "1234"
