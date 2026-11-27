@@ -45,7 +45,9 @@
 #define ST504 "504"
 #define ST550 "550"
 #define ST552 "552"
+#define ST553 "553"
 #define ST554 "554"
+
 
 
 // APPLICATION RESPONSES
